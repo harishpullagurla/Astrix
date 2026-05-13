@@ -20,9 +20,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           if (!existingUser) {
             await User.create({
-              name: user.name,
-              email: user.email,
-              image: user.image,
+              name: user.name ?? "Unknown User",
+              email: email,
+              image: user.image ?? "",
               coins: 20,
               role: "student",
             });
