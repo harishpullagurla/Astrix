@@ -24,7 +24,7 @@ import { uploadPaper } from "@/lib/actions";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function UploadModal({ children }: { children: React.ReactNode }) {
+export function UploadModal({ children }: { children: React.ReactElement }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -54,11 +54,7 @@ export function UploadModal({ children }: { children: React.ReactNode }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <div className="cursor-pointer">
-          {children}
-        </div>
-      </DialogTrigger>
+      <DialogTrigger render={children} nativeButton={false} />
       <DialogContent className="sm:max-w-[500px] bg-[#0a0a0a] border-white/10 text-white p-0 overflow-hidden">
         <AnimatePresence mode="wait">
           {!isSuccess ? (
@@ -141,14 +137,25 @@ export function UploadModal({ children }: { children: React.ReactNode }) {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-zinc-400">Exam Type</Label>
-                    <Select name="examType" defaultValue="Mid-Sem">
+                    <Label className="text-zinc-400">Resource Category</Label>
+                    <Select name="resourceType" defaultValue="Mid-Sem Paper">
                       <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent className="bg-zinc-900 border-white/10 text-white">
-                        <SelectItem value="Mid-Sem">Mid-Sem</SelectItem>
-                        <SelectItem value="End-Sem">End-Sem</SelectItem>
+                        <SelectItem value="Mid-Sem Paper">Mid-Sem Paper</SelectItem>
+                        <SelectItem value="End-Sem Paper">End-Sem Paper</SelectItem>
+                        <SelectItem value="Quiz Paper">Quiz Paper</SelectItem>
+                        <SelectItem value="Notes">Notes</SelectItem>
+                        <SelectItem value="Lecture Slides">Lecture Slides</SelectItem>
+                        <SelectItem value="Reference Material">Reference Material</SelectItem>
+                        <SelectItem value="Assignment">Assignment</SelectItem>
+                        <SelectItem value="Tutorial">Tutorial</SelectItem>
+                        <SelectItem value="Lab Manual">Lab Manual</SelectItem>
+                        <SelectItem value="Weekly Lab Sheet">Weekly Lab Sheet</SelectItem>
+                        <SelectItem value="Viva Questions">Viva Questions</SelectItem>
+                        <SelectItem value="Cheat Sheet">Cheat Sheet</SelectItem>
+                        <SelectItem value="Useful PDF">Useful PDF</SelectItem>
                         <SelectItem value="Other">Other</SelectItem>
                       </SelectContent>
                     </Select>

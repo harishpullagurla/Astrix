@@ -14,12 +14,13 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isDashboard = nextUrl.pathname.startsWith("/dashboard");
+      const isPublicRoute = nextUrl.pathname === "/";
       
-      if (isDashboard) {
+      if (!isPublicRoute) {
         if (isLoggedIn) return true;
         return false; // Redirect to login
       } else if (isLoggedIn) {
+        // Redirect logged-in users from landing page to dashboard
         return Response.redirect(new URL("/dashboard", nextUrl));
       }
       return true;

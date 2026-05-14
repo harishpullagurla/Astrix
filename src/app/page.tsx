@@ -3,16 +3,15 @@
 import { motion } from "framer-motion";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { NebulaBackground } from "@/components/nebula-background";
-import { FloatingParticles } from "@/components/floating-particles";
 import { AstrixLogo } from "@/components/logo";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#030303] text-white selection:bg-purple-500/30 overflow-hidden relative">
       <NebulaBackground />
-      <FloatingParticles />
 
       <main className="max-w-7xl mx-auto px-6 min-h-screen flex flex-col items-center justify-center relative z-10">
+
         {/* Hero Section */}
         <div className="flex flex-col items-center text-center space-y-10">
           <motion.div

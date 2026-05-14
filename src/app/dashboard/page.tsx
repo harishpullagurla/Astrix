@@ -1,16 +1,7 @@
-import { auth, signOut } from "@/auth";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { 
-  LogOut, 
-  Coins, 
-  Upload, 
-  Search, 
-  BookMarked, 
-  User as UserIcon,
-  LayoutDashboard
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { AstrixLogo } from "@/components/logo";
+import { Navbar } from "@/components/navbar";
+import { getRecentActivity } from "@/lib/actions";
 import DashboardClient from "./dashboard-client";
 
 export default async function DashboardPage() {
@@ -20,6 +11,8 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
+  const recentActivity = await getRecentActivity();
+
   return (
     <div className="min-h-screen bg-[#030303] text-white overflow-hidden relative">
       {/* Background Gradients */}
@@ -28,33 +21,10 @@ export default async function DashboardPage() {
         <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full" />
       </div>
 
-      <nav className="border-b border-white/5 bg-black/20 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <AstrixLogo size={28} />
-            <span className="font-semibold tracking-tight text-lg">Astrix</span>
-          </div>
-
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/" });
-            }}
-          >
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-zinc-400 hover:text-white hover:bg-white/5 gap-2"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </Button>
-          </form>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="max-w-7xl mx-auto px-6 py-12">
-        <DashboardClient session={session} />
+        <DashboardClient session={session} recentActivity={recentActivity} />
       </main>
     </div>
   );
