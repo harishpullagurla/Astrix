@@ -70,4 +70,4 @@ npm run dev
 - **Rate Limiting:** Protects the platform from automated spam and bot activity.
 
 ---
-Built with ❤️ by the IIITDMJ Community.
+
