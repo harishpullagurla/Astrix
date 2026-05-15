@@ -24,6 +24,9 @@ export interface IResource extends Document {
   fileSize: number; // in bytes
   uploader: mongoose.Types.ObjectId;
   status: "pending" | "approved" | "rejected";
+  qualityScore: number;
+  groupId: string;
+  fileHash?: string;
   createdAt: Date;
   updatedAt: Date;
 }

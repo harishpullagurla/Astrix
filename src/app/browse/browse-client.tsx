@@ -118,7 +118,7 @@ export default function BrowseClient({
                 <BookOpen className="w-4 h-4" />
                 Semester
               </label>
-              <Select value={semester} onValueChange={setSemester}>
+              <Select value={semester} onValueChange={(val) => setSemester(val || "all")}>
                 <SelectTrigger className="w-full bg-white/5 border-white/10 h-12 text-base text-white rounded-xl">
                   <SelectValue placeholder="All Semesters" />
                 </SelectTrigger>
@@ -136,7 +136,7 @@ export default function BrowseClient({
                 <Filter className="w-4 h-4" />
                 Category
               </label>
-              <Select value={resourceType} onValueChange={setResourceType}>
+              <Select value={resourceType} onValueChange={(val) => setResourceType(val || "all")}>
                 <SelectTrigger className="w-full bg-white/5 border-white/10 h-12 text-base text-white rounded-xl">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>

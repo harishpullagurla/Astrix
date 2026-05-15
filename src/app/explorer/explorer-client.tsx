@@ -350,7 +350,7 @@ export default function ExplorerClient({
                   <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-2">
                     <BookOpen className="w-3 h-3" /> Semester
                   </label>
-                  <Select value={searchSemester} onValueChange={setSearchSemester}>
+                  <Select value={searchSemester} onValueChange={(val) => setSearchSemester(val || "all")}>
                     <SelectTrigger className="w-full bg-white/5 border-white/10 h-12 text-white rounded-xl">
                       <SelectValue placeholder="All" />
                     </SelectTrigger>
@@ -365,7 +365,7 @@ export default function ExplorerClient({
                   <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-2">
                     <Filter className="w-3 h-3" /> Category
                   </label>
-                  <Select value={searchType} onValueChange={setSearchType}>
+                  <Select value={searchType} onValueChange={(val) => setSearchType(val || "all")}>
                     <SelectTrigger className="w-full bg-white/5 border-white/10 h-12 text-white rounded-xl">
                       <SelectValue placeholder="All" />
                     </SelectTrigger>
