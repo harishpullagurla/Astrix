@@ -3,7 +3,6 @@
 **Your one-stop academic intelligence platform for IIITDMJ.**  
 Access past papers, share study resources, and earn rewards through an AI-verified ecosystem.
 
-![Astrix Banner](https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop)
 
 ## 🚀 Key Features
 
