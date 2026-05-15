@@ -1,5 +1,6 @@
 "use server";
 
+import { put } from "@vercel/blob";
 import { auth } from "@/auth";
 import connectToDatabase from "./db";
 import Resource from "@/models/Resource";
@@ -7,8 +8,6 @@ import User from "@/models/User";
 import Unlock from "@/models/Unlock";
 import Post from "@/models/Post";
 import { revalidatePath } from "next/cache";
-import fs from "fs/promises";
-import path from "path";
 import { signOut } from "@/auth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import crypto from "crypto";
@@ -433,11 +432,10 @@ export async function uploadPaper(formData: FormData) {
 
   // --- 4. File Storage ---
   const filename = `${Date.now()}-${file.name.replaceAll(" ", "-")}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  const filePath = path.join(uploadDir, filename);
-
-  await fs.writeFile(filePath, buffer);
-  const publicUrl = `/uploads/${filename}`;
+  const blob = await put(filename, buffer, {
+    access: "public",
+  });
+  const publicUrl = blob.url;
 
   // --- 5. Database Record ---
   const groupId = `${subjectCode}-${year}-${semester}-${resourceType.replaceAll(" ", "-")}`;
