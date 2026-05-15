@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Astrix - IIITDMJ Academic Intelligence",
+  title: "Astrix",
   description: "The premium academic platform for IIITDM Jabalpur students.",
 };
 

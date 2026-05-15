@@ -10,6 +10,10 @@ import { revalidatePath } from "next/cache";
 import fs from "fs/promises";
 import path from "path";
 import { signOut } from "@/auth";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import crypto from "crypto";
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function signOutAction() {
   await signOut({ redirectTo: "/" });
@@ -46,6 +50,7 @@ export async function createPost(formData: FormData) {
   const session = await auth();
   if (!session || !session.user) throw new Error("Unauthorized");
 
+  const userId = (session.user as any).id;
   const title = formData.get("title") as string;
   const content = formData.get("content") as string;
   const category = formData.get("category") as any;
@@ -55,12 +60,62 @@ export async function createPost(formData: FormData) {
   if (!title || !content || !category) throw new Error("Missing fields");
 
   await connectToDatabase();
+
+  // --- 1. Rate Limiting (Spam Prevention) ---
+  const dailyPosts = await Post.countDocuments({
+    author: userId,
+    createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+  });
+
+  if (dailyPosts >= 5) {
+    throw new Error("Insight Overload: You can only share 5 insights per 24 hours. Let others speak too!");
+  }
+
+  // --- 2. AI Content Moderation ---
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const prompt = `You are an academic community moderator for ExamForge (IIITDMJ Community). 
+      Analyze this user-generated insight/post for quality and relevance.
+      
+      POST DATA:
+      Title: ${title}
+      Category: ${category}
+      Content: ${content}
+      Tags: ${tags.join(", ")}
+
+      MODERATION RULES:
+      1. Quality: Reject if the content is just random characters, "shitposting", or extremely low effort (e.g., "adsdsad").
+      2. Relevance: The content should be relevant to students, academics, career, or college life.
+      3. Safety: Reject any content that contains hate speech, extreme toxicity, or illegal material.
+      4. Academic Integrity: While personal opinions are okay, blatant misinformation should be flagged.
+
+      Return ONLY a JSON object:
+      {
+        "isApproved": boolean,
+        "reason": string (if rejected),
+        "suggestedTags": string[] (optional additions)
+      }`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const modData = JSON.parse(response.text().replace(/```json|```/g, ""));
+
+    if (!modData.isApproved) {
+      throw new Error(`AI Moderation Rejected: ${modData.reason || "Content did not meet community standards."}`);
+    }
+
+  } catch (error: any) {
+    console.error("Moderation failed:", error);
+    if (error.message.includes("Moderation Rejected")) throw error;
+    // If AI fails, we allow it but flag it internally for manual review
+  }
+
   await Post.create({
     title,
     content,
     category,
     tags,
-    author: (session.user as any).id
+    author: userId
   });
 
   revalidatePath("/insights");
@@ -254,12 +309,13 @@ export async function uploadPaper(formData: FormData) {
     throw new Error("Unauthorized");
   }
 
+  const userId = (session.user as any).id;
   const file = formData.get("file") as File;
-  const title = formData.get("title") as string;
-  const subjectCode = formData.get("subjectCode") as string;
-  const year = parseInt(formData.get("year") as string);
-  const semester = parseInt(formData.get("semester") as string);
-  const resourceType = formData.get("resourceType") as any;
+  let title = formData.get("title") as string;
+  let subjectCode = (formData.get("subjectCode") as string).toUpperCase();
+  let year = parseInt(formData.get("year") as string);
+  let semester = parseInt(formData.get("semester") as string);
+  let resourceType = formData.get("resourceType") as any;
 
   if (!file || !title || !subjectCode || !year || !semester || !resourceType) {
     throw new Error("Missing required fields");
@@ -267,11 +323,115 @@ export async function uploadPaper(formData: FormData) {
 
   await connectToDatabase();
 
-  // 1. Save file to local public/uploads directory
+  // --- 1. Duplicate Detection (Hashing) ---
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
+  const fileHash = crypto.createHash("sha256").update(buffer).digest("hex");
 
-  // Create a unique filename to avoid collisions
+  const existingFile = await Resource.findOne({ fileHash });
+  if (existingFile) {
+    throw new Error("Duplicate Content: This file has already been uploaded to ExamForge.");
+  }
+
+  // --- 2. Shredding Prevention (Spam Detection) ---
+  const tempGroupId = `${subjectCode}-${year}-${semester}-${resourceType.replaceAll(" ", "-")}`;
+  const recentUploads = await Resource.countDocuments({
+    uploader: userId,
+    groupId: tempGroupId,
+    createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) } // Last 24 hours
+  });
+
+  if (recentUploads >= 3) {
+    throw new Error("Spam Limit: You have already uploaded 3 resources for this specific category today. Please combine notes into a single PDF.");
+  }
+
+  let qualityScore = 0;
+  let isLegit = false;
+
+  // --- 3. Strict AI Validation (IIITDMJ Context) ---
+  try {
+    const base64File = buffer.toString("base64");
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const prompt = `You are a professional academic auditor for PDPM IIITDM Jabalpur. 
+      Examine this document for academic authenticity and quality.
+      
+      CRITICAL IIITDMJ CURRICULUM DATA:
+      Use these latest subject codes for mapping:
+      - Operating Systems: CS2006
+      - Discrete Structures: CS1005
+      - Data Structures: IT2001
+      - Database Management Systems: CS3002
+      - Design and Analysis of Algorithms: CS3001
+      - Computer Networks: CS3004
+      - Theory of Computation: CS2005
+      - Computer Organization and Architecture: CS2004
+      - Object Oriented Programming: CS2002
+      - Engineering Mathematics: MA1001, MA1002
+      (If the document title matches these subjects, you MUST use these exact codes).
+
+      AUDIT RULES:
+      1. Correct Tagging: You are responsible for giving the CORRECT Subject Code, Year, and Semester. If the user provided "CS202" but the document is for "Discrete Structures", you MUST correct it to "CS1005".
+      2. Focus on Academic Content: If the document is a high-quality academic resource, it should be accepted.
+      3. Verify Relevance: The content should be relevant to the subject code or title.
+      4. Quality Score: Be strict. If blurry or non-academic, set isLegit to false.
+
+      Return ONLY a JSON object:
+      {
+        "isLegit": boolean,
+        "qualityScore": number (1-10),
+        "subjectCode": string (IIITDMJ latest format),
+        "year": number,
+        "semester": number (1-8),
+        "resourceType": string (Choose from standard list),
+        "suggestedTitle": string (Professional title)
+      }`;
+
+    const result = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          data: base64File,
+          mimeType: file.type || "application/pdf"
+        }
+      }
+    ]);
+
+    const response = await result.response;
+    const aiData = JSON.parse(response.text().replace(/```json|```/g, ""));
+    
+    if (!aiData.isLegit || aiData.qualityScore < 2) {
+      throw new Error("AI rejection: This does not appear to be a legitimate IIITDMJ academic resource or is of extremely low quality.");
+    }
+
+    // AI Overrides & Sanitization
+    isLegit = aiData.isLegit;
+    qualityScore = aiData.qualityScore;
+    subjectCode = aiData.subjectCode || subjectCode;
+    year = aiData.year || year;
+    semester = aiData.semester || semester;
+    title = aiData.suggestedTitle || title;
+
+    const validTypes = [
+      "Mid-Sem Paper", "End-Sem Paper", "Quiz Paper", "Notes", "Lecture Slides", 
+      "Reference Material", "Assignment", "Tutorial", "Lab Manual", 
+      "Weekly Lab Sheet", "Viva Questions", "Cheat Sheet", "Useful PDF", "Other"
+    ];
+
+    if (validTypes.includes(aiData.resourceType)) {
+      resourceType = aiData.resourceType;
+    } else if (aiData.resourceType.includes("Notes")) {
+      resourceType = "Notes";
+    } else {
+      resourceType = validTypes.includes(resourceType) ? resourceType : "Other";
+    }
+
+  } catch (error: any) {
+    console.error("Audit failed:", error);
+    if (error.message.includes("AI rejection") || error.message.includes("Spam")) throw error;
+    throw new Error("Verification Failed: We couldn't verify this as a valid IIITDMJ resource. Ensure the document is clear.");
+  }
+
+  // --- 4. File Storage ---
   const filename = `${Date.now()}-${file.name.replaceAll(" ", "-")}`;
   const uploadDir = path.join(process.cwd(), "public", "uploads");
   const filePath = path.join(uploadDir, filename);
@@ -279,25 +439,46 @@ export async function uploadPaper(formData: FormData) {
   await fs.writeFile(filePath, buffer);
   const publicUrl = `/uploads/${filename}`;
 
-  // 2. Create Resource record
+  // --- 5. Database Record ---
+  const groupId = `${subjectCode}-${year}-${semester}-${resourceType.replaceAll(" ", "-")}`;
+
   const resource = await Resource.create({
     title,
-    subjectCode,
+    subjectCode: subjectCode.toUpperCase(),
     year,
     semester,
     resourceType,
     fileUrl: publicUrl,
     fileSize: file.size,
-    uploader: (session.user as any).id,
+    uploader: userId,
     status: "approved",
+    qualityScore,
+    groupId,
+    fileHash
   });
 
-  // 3. Reward User with 10 coins
-  await User.findByIdAndUpdate((session.user as any).id, {
-    $inc: { coins: 10 },
-  });
+  // --- 6. Throttled Reward Logic ---
+  let coinsToAward = 0;
+  if (qualityScore >= 7) coinsToAward = 10;
+  else if (qualityScore >= 4) coinsToAward = 5;
+  else if (qualityScore >= 2) coinsToAward = 2;
+
+  // Reduce reward if they already uploaded to this group today (discourage shredding)
+  if (recentUploads > 0) {
+    coinsToAward = Math.floor(coinsToAward / 2);
+  }
+
+  if (coinsToAward > 0) {
+    await User.findByIdAndUpdate(userId, {
+      $inc: { coins: coinsToAward },
+    });
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/explorer");
-  return { success: true, paperId: resource._id.toString() };
+  return { 
+    success: true, 
+    paperId: resource._id.toString(),
+    reward: coinsToAward 
+  };
 }

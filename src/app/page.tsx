@@ -54,16 +54,14 @@ export default function LandingPage() {
               Astrix
             </span>
           </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="max-w-2xl text-lg md:text-xl text-zinc-400 font-normal leading-relaxed font-inter"
-          >
-            The premium academic intelligence platform for IIITDMJ students. 
-            Access past papers, share resources, and earn rewards.
-          </motion.p>
+<motion.p
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5, delay: 0.2 }}
+  className="max-w-2xl text-lg md:text-xl text-zinc-400 font-normal leading-relaxed font-inter"
+>
+  The academic platform for IIITDMJ students to access past papers, share study resources, and earn rewards.
+</motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}

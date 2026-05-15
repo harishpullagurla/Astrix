@@ -2,7 +2,7 @@
 
 import { AstrixLogo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, Compass, BookMarked, MessageSquare } from "lucide-react";
+import { LogOut, LayoutDashboard, Compass, BookMarked, MessageSquare, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOutAction } from "@/lib/actions";
@@ -61,16 +61,21 @@ export function Navbar() {
           </Link>
         </div>
 
-        <form action={signOutAction}>
-          <Button
-            variant="ghost"
-            size="default"
-            className="text-zinc-400 hover:text-white hover:bg-white/5 gap-2 text-base font-medium"
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="hidden sm:inline">Sign Out</span>
-          </Button>
-        </form>
+        <div className="flex items-center gap-4">
+          <Link href="/profile">
+            <Button
+              variant="ghost"
+              size="default"
+              className={`h-11 w-11 p-0 rounded-full border transition-all ${
+                pathname === "/profile" 
+                  ? "bg-purple-500/10 border-purple-500/30 text-purple-400" 
+                  : "bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:border-white/20"
+              }`}
+            >
+              <UserIcon className="w-5 h-5" />
+            </Button>
+          </Link>
+        </div>
       </div>
     </nav>
   );

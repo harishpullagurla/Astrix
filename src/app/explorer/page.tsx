@@ -31,6 +31,7 @@ export default async function ExplorerPage() {
           initialPapers={initialPapers} 
           unlockedPaperIds={unlockedPaperIds}
           currentUserId={(session.user as any).id}
+          initialCoins={(session.user as any).coins || 0}
         />
       </main>
     </div>

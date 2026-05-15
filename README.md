@@ -1,57 +1,74 @@
-# Astrix (ExamForge)
+# ☄️ Astrix (formerly ExamForge)
 
-Astrix is a premium, campus-restricted academic intelligence platform exclusively for the students of **IIITDM Jabalpur**. It allows students to share previous year question papers (PYQs), earn virtual coins for contributions, and unlock study materials.
+**Your one-stop academic intelligence platform for IIITDMJ.**  
+Access past papers, share study resources, and earn rewards through an AI-verified ecosystem.
 
-## Features (Phase 1)
+![Astrix Banner](https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop)
 
-- **Domain-Restricted Auth:** Google OAuth restricted to `@iiitdmj.ac.in`.
-- **Coin Economy:** Automatic 20 coin balance for new users.
-- **Premium UI:** Dark-themed, glassmorphism design with Framer Motion animations.
-- **Protected Dashboard:** Secure access to user-specific academic insights.
+## 🚀 Key Features
 
-## Tech Stack
+### 🤖 AI-Driven Auditing
+- **Automated Validation:** Every upload is vetted by **Gemini 2.5 Flash** for academic relevance and quality.
+- **Smart Categorization:** AI automatically maps documents to the latest **IIITDMJ Curriculum** (e.g., CS2006 for OS).
+- **Anti-Spam:** Content moderation for the community "Insights" tab.
 
-- **Framework:** Next.js 15 (App Router)
-- **Database:** MongoDB Atlas with Mongoose
-- **Authentication:** Auth.js (NextAuth v5)
-- **Styling:** Tailwind CSS, shadcn/ui
-- **Animations:** Framer Motion
+### 💰 AST Coin Economy
+- **Contribute to Earn:** Share high-quality papers and notes to earn AST coins.
+- **Unlock Knowledge:** Spend coins to gain access to premium resources contributed by peers.
+- **Fairness First:** Throttled rewards and duplicate detection prevent "farming" and ensure high-quality content.
 
-## Getting Started
+### 📂 Academic Explorer
+- **Smart Search:** Filter by Semester, Category, or keyword.
+- **Virtual Directory:** Navigate through a familiar folder hierarchy: `Semesters > Subjects > Files`.
+- **Skeleton Loaders:** Zero-flicker UI for a smooth searching experience.
+
+### 👤 Personalized Hub
+- **Email Intelligence:** Automatically parses IIITDMJ roll numbers to show your Batch, Branch, and Program.
+- **Contribution Stats:** Track your impact with real-time approval rates and quality scores.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** [Next.js 15+](https://nextjs.org/) (App Router), [React 19](https://reactjs.org/), [Tailwind CSS](https://tailwindcss.com/)
+- **Backend:** Next.js Server Actions, [MongoDB](https://www.mongodb.com/) (Mongoose)
+- **AI:** [Google Gemini 2.5 Flash](https://ai.google.dev/)
+- **Auth:** [NextAuth.js](https://next-auth.js.org/) (Google Provider)
+- **Animations:** [Framer Motion](https://www.framer.com/motion/)
+
+---
+
+## 🚦 Getting Started
 
 ### 1. Prerequisites
-- Node.js 18+ 
-- MongoDB Atlas cluster
-- Google Cloud Project (for OAuth credentials)
+- Node.js 20+
+- MongoDB instance (Atlas or local)
+- Google Cloud Console credentials (for Auth)
+- Gemini API Key
 
 ### 2. Environment Setup
-Create a `.env.local` file in the root directory and fill in the following:
+Create a `.env.local` file in the root:
 
 ```env
-MONGODB_URI=your_mongodb_atlas_uri
-AUTH_SECRET=your_nextauth_secret (generate with `npx auth secret`)
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
+MONGODB_URI=your_mongodb_uri
+NEXTAUTH_SECRET=your_secret
+GOOGLE_CLIENT_ID=your_id
+GOOGLE_CLIENT_SECRET=your_secret
+GEMINI_API_KEY=your_gemini_key
 ```
 
 ### 3. Installation
 ```bash
 npm install
-```
-
-### 4. Development
-```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-## Architecture Highlights
+## 🛡️ Security Measures
+- **Digital Fingerprinting:** SHA-256 hashing to detect and block duplicate file uploads.
+- **Restricted Access:** Hard-locked to `@iiitdmj.ac.in` email domains.
+- **Rate Limiting:** Protects the platform from automated spam and bot activity.
 
-- **`src/auth.ts`**: Centralized authentication logic and domain enforcement.
-- **`src/lib/db.ts`**: Cached MongoDB connection utility for serverless environments.
-- **`src/middleware.ts`**: Route protection and intelligent redirects.
-- **`src/models/User.ts`**: Mongoose schema for the platform's user base.
-
-## License
-Private - IIITDM Jabalpur Students only.
+---
+Built with ❤️ by the IIITDMJ Community.

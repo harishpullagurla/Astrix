@@ -62,12 +62,19 @@ const ResourceSchema: Schema = new Schema(
       enum: ["pending", "approved", "rejected"], 
       default: "approved" // Auto-approve for MVP
     },
+    qualityScore: { type: Number, default: 0 },
+    groupId: { type: String }, // Format: subject-year-semester-category
+    fileHash: { type: String, unique: true, sparse: true }, // For duplicate detection
+    isFlagged: { type: Boolean, default: false },
+    reports: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
 
 // Indexing for faster searches
 ResourceSchema.index({ subjectCode: 1, year: 1, semester: 1 });
+ResourceSchema.index({ groupId: 1 });
+ResourceSchema.index({ fileHash: 1 });
 
 const Resource: Model<IResource> =
   mongoose.models.Resource || mongoose.model<IResource>("Resource", ResourceSchema);

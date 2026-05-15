@@ -104,9 +104,9 @@ export function UploadModal({ children }: { children: React.ReactElement }) {
                     <Input 
                       id="subjectCode" 
                       name="subjectCode" 
-                      placeholder="CS202" 
+                      placeholder="CS2001" 
                       required 
-                      className="bg-white/5 border-white/10 text-white"
+                      className="bg-white/5 border-white/10 text-white" 
                     />
                   </div>
                   <div className="space-y-2">
